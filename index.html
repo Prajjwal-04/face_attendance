@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Authentication Attendance System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .content {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        video {
+            width: 100%;
+            display: block;
+        }
+
+        canvas {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .status-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .status-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .status-error {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .status-warning {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .status-info {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+
+        .info-card {
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .info-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-card ul {
+            margin-left: 20px;
+            color: #4a5568;
+        }
+
+        .info-card li {
+            margin-bottom: 5px;
+        }
+
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .attendance-table th,
+        .attendance-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .attendance-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .attendance-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .badge-warning {
+            background: #feebc8;
+            color: #7c2d12;
+        }
+
+        .badge-danger {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .spoof-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .spoof-real {
+            background: rgba(72, 187, 120, 0.9);
+            color: white;
+        }
+
+        .spoof-fake {
+            background: rgba(245, 101, 101, 0.9);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Face Authentication Attendance</h1>
+            <p>Advanced face recognition with spoof detection</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('register')">📝 Register</button>
+            <button class="tab" onclick="switchTab('attendance')">✅ Mark Attendance</button>
+            <button class="tab" onclick="switchTab('records')">📊 View Records</button>
+        </div>
+
+        <!-- Register Tab -->
+        <div id="register" class="content active">
+            <h2>Register New User</h2>
+            <div class="info-card">
+                <h3>Registration Instructions:</h3>
+                <ul>
+                    <li>Position your face clearly in the camera frame</li>
+                    <li>Ensure good lighting conditions</li>
+                    <li>Look directly at the camera</li>
+                    <li>Remove glasses if possible for better accuracy</li>
+                </ul>
+            </div>
+
+            <div class="video-container">
+                <video id="registerVideo" autoplay></video>
+                <canvas id="registerCanvas"></canvas>
+            </div>
+
+            <div class="form-group">
+                <label for="userName">Full Name:</label>
+                <input type="text" id="userName" placeholder="Enter full name">
+            </div>
+
+            <div class="form-group">
+                <label for="userId">Employee ID:</label>
+                <input type="text" id="userId" placeholder="Enter employee ID">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="startRegisterCamera()">📷 Start Camera</button>
+                <button class="btn-success" onclick="captureAndRegister()">✅ Capture & Register</button>
+            </div>
+
+            <div id="registerStatus"></div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="content">
+            <h2>Mark Attendance</h2>
+            <div class="info-card">
+                <h3>Attendance Instructions:</h3>
+                <ul>
+                    <li>Click "Start Camera" to begin face detection</li>
+                    <li>Position your face in frame until identified</li>
+                    <li>Click "Punch In" at start of day</li>
+                    <li>Click "Punch Out" at end of day</li>
+                    <li>System includes basic spoof detection</li>
+                </ul>
+            </div>
+
+            <div class="video-container">
+                <video id="attendanceVideo" autoplay></video>
+                <canvas id="attendanceCanvas"></canvas>
+                <div id="spoofIndicator" class="spoof-indicator" style="display: none;"></div>
+            </div>
+
+            <div id="identificationResult"></div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="startAttendanceCamera()">📷 Start Camera</button>
+                <button class="btn-success" onclick="markAttendance('punch_in')">⏰ Punch In</button>
+                <button class="btn-danger" onclick="markAttendance('punch_out')">🏁 Punch Out</button>
+            </div>
+
+            <div id="attendanceStatus"></div>
+        </div>
+
+        <!-- Records Tab -->
+        <div id="records" class="content">
+            <h2>Attendance Records</h2>
+            
+            <div class="form-group">
+                <label for="recordDate">Select Date:</label>
+                <input type="date" id="recordDate">
+                <button class="btn-primary" onclick="loadAttendanceRecords()" style="margin-top: 10px; width: 200px;">Load Records</button>
+            </div>
+
+            <div id="recordsContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        let registerStream = null;
+        let attendanceStream = null;
+        let currentUser = null;
+        let identificationInterval = null;
+
+        // Set today's date as default
+        document.getElementById('recordDate').valueAsDate = new Date();
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+
+            // Stop cameras when switching tabs
+            if (tabName !== 'register' && registerStream) {
+                registerStream.getTracks().forEach(track => track.stop());
+                registerStream = null;
+            }
+            if (tabName !== 'attendance' && attendanceStream) {
+                attendanceStream.getTracks().forEach(track => track.stop());
+                attendanceStream = null;
+                if (identificationInterval) {
+                    clearInterval(identificationInterval);
+                    identificationInterval = null;
+                }
+            }
+
+            // Load records when switching to records tab
+            if (tabName === 'records') {
+                loadAttendanceRecords();
+            }
+        }
+
+        async function startRegisterCamera() {
+            try {
+                const video = document.getElementById('registerVideo');
+                registerStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = registerStream;
+                showStatus('registerStatus', 'Camera started successfully', 'success');
+            } catch (error) {
+                showStatus('registerStatus', 'Error accessing camera: ' + error.message, 'error');
+            }
+        }
+
+        async function captureAndRegister() {
+            const name = document.getElementById('userName').value.trim();
+            const userId = document.getElementById('userId').value.trim();
+
+            if (!name || !userId) {
+                showStatus('registerStatus', 'Please enter both name and employee ID', 'error');
+                return;
+            }
+
+            if (!registerStream) {
+                showStatus('registerStatus', 'Please start the camera first', 'error');
+                return;
+            }
+
+            const video = document.getElementById('registerVideo');
+            const canvas = document.getElementById('registerCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        user_id: userId,
+                        image: imageData
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('registerStatus', result.message, 'success');
+                    document.getElementById('userName').value = '';
+                    document.getElementById('userId').value = '';
+                } else {
+                    showStatus('registerStatus', result.message, 'error');
+                }
+            } catch (error) {
+                showStatus('registerStatus', 'Error: ' + error.message, 'error');
+            }
+        }
+
+        async function startAttendanceCamera() {
+            try {
+                const video = document.getElementById('attendanceVideo');
+                attendanceStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = attendanceStream;
+                
+                // Start continuous identification
+                if (identificationInterval) {
+                    clearInterval(identificationInterval);
+                }
+                identificationInterval = setInterval(identifyFace, 2000);
+                
+                showStatus('attendanceStatus', 'Camera started. Identifying...', 'info');
+            } catch (error) {
+                showStatus('attendanceStatus', 'Error accessing camera: ' + error.message, 'error');
+            }
+        }
+
+        async function identifyFace() {
+            if (!attendanceStream) return;
+
+            const video = document.getElementById('attendanceVideo');
+            const canvas = document.getElementById('attendanceCanvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+
+            try {
+                // Add timeout to prevent hanging
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+                const response = await fetch('/identify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        image: imageData
+                    }),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                const result = await response.json();
+
+                if (result.identified) {
+                    currentUser = {
+                        name: result.name,
+                        user_id: result.user_id
+                    };
+
+                    const confidence = (result.confidence * 100).toFixed(1);
+                    const spoofIndicator = document.getElementById('spoofIndicator');
+                    spoofIndicator.style.display = 'block';
+                    
+                    if (result.is_real) {
+                        spoofIndicator.textContent = '✓ Real Face';
+                        spoofIndicator.className = 'spoof-indicator spoof-real';
+                    } else {
+                        spoofIndicator.textContent = '⚠ Spoof Detected';
+                        spoofIndicator.className = 'spoof-indicator spoof-fake';
+                    }
+
+                    document.getElementById('identificationResult').innerHTML = `
+                        <div class="status-box status-success">
+                            <strong>Identified:</strong> ${result.name}<br>
+                            <strong>ID:</strong> ${result.user_id}<br>
+                            <strong>Confidence:</strong> ${confidence}%<br>
+                            <strong>Status:</strong> ${result.is_real ? 'Real Face ✓' : 'Possible Spoof ⚠'}
+                        </div>
+                    `;
+                } else {
+                    currentUser = null;
+                    document.getElementById('spoofIndicator').style.display = 'none';
+                    document.getElementById('identificationResult').innerHTML = `
+                        <div class="status-box status-warning">
+                            <strong>Status:</strong> No face recognized. Please position yourself clearly.
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Identification request timed out');
+                    document.getElementById('identificationResult').innerHTML = `
+                        <div class="status-box status-warning">
+                            <strong>Status:</strong> Identification timeout. Please try again.
+                        </div>
+                    `;
+                } else {
+                    console.error('Identification error:', error);
+                    document.getElementById('identificationResult').innerHTML = `
+                        <div class="status-box status-error">
+                            <strong>Error:</strong> ${error.message}
+                        </div>
+                    `;
+                }
+                currentUser = null;
+                document.getElementById('spoofIndicator').style.display = 'none';
+            }
+        }
+
+        async function markAttendance(action) {
+            if (!currentUser) {
+                showStatus('attendanceStatus', 'Please identify yourself first', 'error');
+                return;
+            }
+
+            // Stop identification while marking attendance
+            if (identificationInterval) {
+                clearInterval(identificationInterval);
+                identificationInterval = null;
+            }
+
+            showStatus('attendanceStatus', 'Marking attendance...', 'info');
+
+            try {
+                const response = await fetch('/mark_attendance', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.user_id,
+                        name: currentUser.name,
+                        action: action
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showStatus('attendanceStatus', result.message, 'success');
+                    // Restart identification after successful attendance marking
+                    if (attendanceStream) {
+                        identificationInterval = setInterval(identifyFace, 2000);
+                    }
+                } else {
+                    showStatus('attendanceStatus', result.message, 'error');
+                    // Restart identification after failed attendance marking
+                    if (attendanceStream) {
+                        identificationInterval = setInterval(identifyFace, 2000);
+                    }
+                }
+            } catch (error) {
+                showStatus('attendanceStatus', 'Error: ' + error.message, 'error');
+                // Restart identification after error
+                if (attendanceStream) {
+                    identificationInterval = setInterval(identifyFace, 2000);
+                }
+            }
+        }
+
+        async function loadAttendanceRecords() {
+            const date = document.getElementById('recordDate').value;
+            
+            try {
+                const response = await fetch(`/attendance_summary?date=${date}`);
+                const records = await response.json();
+
+                const container = document.getElementById('recordsContainer');
+
+                if (Object.keys(records).length === 0) {
+                    container.innerHTML = `
+                        <div class="status-box status-info">
+                            No attendance records found for ${date}
+                        </div>
+                    `;
+                    return;
+                }
+
+                let tableHTML = `
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Employee ID</th>
+                                <th>Name</th>
+                                <th>Punch In</th>
+                                <th>Punch Out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                for (const [userId, record] of Object.entries(records)) {
+                    const statusClass = record.status === 'present' ? 'badge-success' : 'badge-danger';
+                    tableHTML += `
+                        <tr>
+                            <td>${userId}</td>
+                            <td>${record.name}</td>
+                            <td>${record.punch_in || '-'}</td>
+                            <td>${record.punch_out || '-'}</td>
+                            <td><span class="badge ${statusClass}">${record.status.toUpperCase()}</span></td>
+                        </tr>
+                    `;
+                }
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = tableHTML;
+            } catch (error) {
+                showStatus('recordsContainer', 'Error loading records: ' + error.message, 'error');
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            const statusClass = `status-${type}`;
+            element.innerHTML = `
+                <div class="status-box ${statusClass}">
+                    ${message}
+                </div>
+            `;
+
+            // Auto-hide after 5 seconds for success messages
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.innerHTML = '';
+                }, 5000);
+            }
+        }
+
+        // Load records on page load
+        window.addEventListener('load', () => {
+            loadAttendanceRecords();
+        });
+    </script>
+</body>
+</html>
